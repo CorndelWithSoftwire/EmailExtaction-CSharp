@@ -15,6 +15,7 @@ namespace Email_Extraction
             if (TryReadFile(filePath, out string fileText))
             {
                 Part1(fileText);
+                Part2(fileText);
             }
         }
 
@@ -49,6 +50,28 @@ namespace Email_Extraction
                 }
             }
             Console.WriteLine($"Part 1\nNumber of substrings matching {softwireDomain}:\t{matchCount}\n");
+        }
+        private static void Part2(string fileText)
+        {
+            const string pattern = @"\b\S+@softwire\.com\b";
+            var rgx = new Regex(pattern, RegexOptions.IgnoreCase);
+            var validEmails = ExtractValidEmailMatchesFromFile(rgx, fileText);
+            Console.WriteLine($"Part 2\nNumber of Softwire emails found using regular expressions:\t{validEmails.Count()}\n");
+        }
+
+        private static IEnumerable<Match> ExtractValidEmailMatchesFromFile(Regex regex, string fileText)
+        {
+            return regex.Matches(fileText)
+                .Cast<Match>()
+                .Where(m => IsValidEmail(m.Value));
+        }
+
+        private static bool IsValidEmail(string email)
+        {
+            return Regex.IsMatch(email,
+                @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
+                @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
+                RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
         }
     }
 }
